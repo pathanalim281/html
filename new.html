@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Saisha Enterprises Billing</title>
+
+<style>
+body {
+    font-family: 'Segoe UI', Arial;
+    margin:0;
+    background: linear-gradient(135deg, #74ebd5, #ACB6E5, #f6d365, #fda085);
+    background-size: 400% 400%;
+    animation: gradientBG 10s ease infinite;
+}
+
+@keyframes gradientBG {
+    0% {background-position: 0% 50%;}
+    50% {background-position: 100% 50%;}
+    100% {background-position: 0% 50%;}
+}
+
+header {
+    background: linear-gradient(90deg,#2c3e50,#34495e);
+    color:white;
+    padding:20px;
+    text-align:center;
+}
+
+.container {
+    padding:20px;
+    max-width:1000px;
+    margin:auto;
+}
+
+.card {
+    background:white;
+    padding:20px;
+    border-radius:10px;
+    box-shadow:0 5px 15px rgba(0,0,0,0.1);
+}
+
+input {
+    padding:10px;
+    margin:5px;
+    border:1px solid #ccc;
+    border-radius:5px;
+}
+
+button {
+    padding:10px 15px;
+    margin:5px;
+    border:none;
+    border-radius:5px;
+    cursor:pointer;
+    font-weight:bold;
+}
+
+.addBtn {background:#27ae60;color:white;}
+.addBtn:hover {background:#219150;}
+
+.downloadBtn {background:#2980b9;color:white;}
+.downloadBtn:hover {background:#21618c;}
+
+.printBtn {background:#8e44ad;color:white;}
+.printBtn:hover {background:#6c3483;}
+
+.deleteBtn {background:#e74c3c;color:white;}
+.deleteBtn:hover {background:#c0392b;}
+
+.table-container {overflow-x:auto;}
+
+table {
+    width:100%;
+    border-collapse: collapse;
+    margin-top:20px;
+}
+
+th, td {
+    border:1px solid #ddd;
+    padding:12px;
+    text-align:center;
+}
+
+th {
+    background:#2c3e50;
+    color:white;
+}
+
+.total {
+    text-align:right;
+    font-size:22px;
+    margin-top:20px;
+    font-weight:bold;
+}
+
+.footer {
+    text-align:center;
+    margin-top:20px;
+    color:#777;
+}
+</style>
+</head>
+<body>
+
+<header>
+<h1>Saisha Enterprises</h1>
+<p>Professional Stationery Billing System</p>
+</header>
+
+<div class="container">
+<div class="card">
+
+<h3>Add Product</h3>
+<input type="text" id="name" placeholder="Product Name">
+<input type="number" id="price" placeholder="Price">
+<input type="number" id="qty" placeholder="Quantity">
+<button class="addBtn" onclick="addItem()">Add Item</button>
+<button class="downloadBtn" onclick="downloadCSV()">Download Excel</button>
+<button class="printBtn" onclick="printBill()">Print Bill</button>
+
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th>Product</th>
+<th>Price (₹)</th>
+<th>Qty</th>
+<th>Total (₹)</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody id="billTable"></tbody>
+</table>
+</div>
+
+<div class="total">
+Grand Total: ₹ <span id="grandTotal">0</span>
+</div>
+
+</div>
+
+<div class="footer">
+© 2026 Saisha Enterprises | Billing Software
+</div>
+</div>
+
+<script>
+let total = 0;
+let items = [];
+
+function addItem() {
+    let name = document.getElementById('name').value.trim();
+    let price = parseFloat(document.getElementById('price').value);
+    let qty = parseInt(document.getElementById('qty').value);
+
+    if(!name || price <= 0 || qty <= 0) {
+        alert("Enter valid details");
+        return;
+    }
+
+    let itemTotal = price * qty;
+    total += itemTotal;
+
+    items.push({name, price, qty, itemTotal});
+
+    renderTable();
+
+    document.getElementById('name').value = "";
+    document.getElementById('price').value = "";
+    document.getElementById('qty').value = "";
+}
+
+function renderTable() {
+    let table = document.getElementById('billTable');
+    table.innerHTML = "";
+
+    items.forEach((item, index) => {
+        let row = table.insertRow();
+        row.innerHTML = `
+            <td>${item.name}</td>
+            <td>${item.price}</td>
+            <td>${item.qty}</td>
+            <td>${item.itemTotal}</td>
+            <td><button class="deleteBtn" onclick="removeItem(${index})">Delete</button></td>
+        `;
+    });
+
+    document.getElementById('grandTotal').innerText = total;
+}
+
+function removeItem(index) {
+    total -= items[index].itemTotal;
+    items.splice(index, 1);
+    renderTable();
+}
+
+function downloadCSV() {
+    if(items.length === 0) {
+        alert("No data available");
+        return;
+    }
+
+    let csv = "Product,Price,Qty,Total\n";
+
+    items.forEach(item => {
+        csv += `${item.name},${item.price},${item.qty},${item.itemTotal}\n`;
+    });
+
+    csv += `\nGrand Total,,,${total}`;
+
+    let blob = new Blob([csv], { type: "text/csv" });
+    let a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "Saisha_Bill.csv";
+    a.click();
+}
+
+function printBill() {
+    window.print();
+}
+</script>
+
+</body>
+</html>
